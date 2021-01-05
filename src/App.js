@@ -1,25 +1,64 @@
 import React from "react";
+import axios from "axios";
+import Movie from "./Movie";
+//import PropTypes from "prop-types";
 
-function Food(dish){
-  return(
-    <h1>{dish.name} + {dish.picture}</h1>
-  )
-}
+class App extends React.Component {
+  state = {
+    //변하는 데이터
+    isLoading: true,
+    movies: [],
+  };
 
-const foodilke = [{id :1, name : "a", picture:"A", rating : 1.1}, {id :2, name : "b", picture:"B", rating : 1.1},{id :3, name : "c", picture:"C", rating : 1.1}];
+  getMovies = async () => {
+    const {
+      data: {
+        data: { movies },
+      },
+    } = await axios.get(
+      "https://yts-proxy.now.sh/list_movies.json?sort_by=rating"
+    );
+    this.setState({ movies: movies, isLoading: false });
+  };
 
-function renderFood(dish){
-  return <Food key={dish.name} name={dish.name} picture={dish.picture} />;
-}
+  componentDidMount() {
+    // setTimeout(() => {
+    //   this.setState({ isLoading: false });
+    // }, 1000);
 
-function App() {
-  return (
-    <div className="App">
-      HELLO
-        {foodilke.map(renderFood)}
-    </div>
-    
-  );
+    this.getMovies();
+  }
+  render() {
+    const { isLoading } = this.state;
+    const { movies } = this.state;
+    return (
+      <section className="container">
+        <div>
+          {isLoading ? (
+            <div className="loader">
+              <span className="loader_text">Loading</span>
+            </div>
+          ) : (
+            <div className="movies">
+              {movies.map((movie) => {
+                return (
+                  <Movie
+                    key={movie.id}
+                    id={movie.id}
+                    year={movie.year}
+                    title={movie.title}
+                    summary={movie.summary}
+                    poster={movie.medium_cover_image}
+                    genres={movie.genres}
+                  />
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </section>
+    );
+  }
 }
 
 export default App;
